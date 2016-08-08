@@ -44,17 +44,29 @@ var metroid = {
 		//  Image Smoothing
 		game.world.smoothed = false;
 
-		//  Control input
+		//  Player Controls
 		this.cursor = game.input.keyboard.createCursorKeys();
 		this.left = game.input.keyboard.addKey(Phaser.Keyboard.A);
 		this.up = game.input.keyboard.addKey(Phaser.Keyboard.W);
 		this.down = game.input.keyboard.addKey(Phaser.Keyboard.S);
 		this.right = game.input.keyboard.addKey(Phaser.Keyboard.D);
+
+		//  Double tap 'down' to crouch ( must have weaponBall )
+		this.cursor.down.onDown.add(this.playerCrouch, this);
+		this.down.onDown.add(this.playerCrouch, this);
+
+		//  fire weapon
 		this.fire = game.input.keyboard.addKey(Phaser.Keyboard.X);
 		this.fire2 = game.input.keyboard.addKey(Phaser.Keyboard.M);
+		this.fire.onDown.add(this.fireWeapon, this);
+		this.fire2.onDown.add(this.fireWeapon, this);
+
+		//  jump
 		this.jumpButton = game.input.keyboard.addKey(Phaser.Keyboard.Z);
 		this.jumpButton2 = game.input.keyboard.addKey(Phaser.Keyboard.N);
 		this.jumpTimer = 0;
+		this.jumpButton.onDown.add(this.playerJump, this);
+		this.jumpButton2.onDown.add(this.playerJump, this);
 
 		//  CREATE THE LEVEL
 		//  Set the map bounds
@@ -77,7 +89,7 @@ var metroid = {
 			'b               b       b       b       b       b             bpxx                     xxxxxxxxxxxxxxxxxxxxxxx                sbbb       b    bp',
 			'                     a     a                                  ppxx                   o            o    o                      pppp            pp',
 			'          btbb       P     P                                  bbxx           o                    *    *                      bbbb            bb',
-			'          bsbp       AA   AA                                  Ddd-                          oo    v    v    oo                Ddd     *       Dd',
+			'          bsbp       AA   AA                                  Ddd-               o          oo    v    v    oo                Ddd     *       Dd',
 			'          pbtbb      sb   sb*                                 -dd-                                               v            -dd-  bsrrrrsb  -d',
 			'          bbsbp      bp   bp                               *  -dd-       o                  *                                 -dd-       *    -d',
 			'           pbtbb     pp   pp                              bttbAAxxxxxxxxxxxxxxxxxxx    xxxxxxxxxxxxxxxxxxxxxxxx     xxxxxxxxxxxxSSSSrrrrrrrrbtbb',
@@ -127,7 +139,7 @@ var metroid = {
 		//  Player animations
 		this.player.animations.add('load',[0],1,true);
 		this.player.animations.add('stand',[1],1,true);
-		this.player.animations.add('ball',[11,12,13,14],20,true);
+		this.player.animations.add('ball',[11,12,13,14],15,true);
 		this.player.animations.add('jump',[5],1,true);
 		this.player.animations.add('jumpRoll',[7,8,9,10],20,true);
 		this.player.animations.add('up',[6],1,true);
@@ -138,11 +150,10 @@ var metroid = {
 		this.playerLeft.enableUpdate = true;
 		this.playerRight.enableUpdate = true;
 
-		//  If jumping
+		//  If player jumping
 		this.jumping = false;
-		//  If crouching trigger
+		//  If crouching crouching
 		this.crouching = false;
-
 		//  Player energy
 		this.playerEnergy = 80;
 
@@ -191,33 +202,25 @@ var metroid = {
 		//  Kill enemies
 		game.physics.arcade.overlap(this.enemies, this.bullets, this.killEnemy, null, this);
 
-		// pickup life
+		//  Pickup energy
 		game.physics.arcade.overlap(this.player, this.energy, this.pickupEnergy, null, this);
 
-		// pickup weapon
+		//  Pickup weapon
 		game.physics.arcade.overlap(this.player, this.orbs, this.pickupWeapon, null, this);
 
-		// die and restart
-		game.physics.arcade.overlap(this.player, this.enemies, this.restart, null, this);
+		//  Die and restart
+		game.physics.arcade.overlap(this.player, this.enemies, this.killPlayer, null, this);
 
 		//  Move the player
 		if (this.cursor.left.isDown || this.left.isDown) {
 			if (this.player.body.touching.down)
 				this.player.play('left');
-			else if (this.jumpButton.isDown || this.jumpButton2.isDown)
-				this.player.play('jumpRoll');
-			else
-				this.player.play('jump');
 			this.player.scale.x = -1;
 			this.player.body.velocity.x = -100;
 		}
 		else if (this.cursor.right.isDown || this.right.isDown) {
 			if (this.player.body.touching.down)
 				this.player.play('right');
-			else if (this.jumpButton.isDown || this.jumpButton2.isDown)
-				this.player.play('jumpRoll');
-			else
-				this.player.play('jump');
 			this.player.scale.x = 1;
 			this.player.body.velocity.x = 100;
 		}
@@ -228,71 +231,105 @@ var metroid = {
 			}
 			this.player.play('up');
 		}
-		else if ((this.cursor.down.isDown || this.down.isDown) && this.weaponBall === true) {
-			this.crouching = true;
-			this.player.play('ball');
-		}
 		else {
-			this.jumping = false;
-			this.player.body.setSize(16,31,8,6);
-			if (game.time.now > this.jumpTimer){
-				this.player.play('stand');
-				this.player.body.velocity.x = 0;
+			if (this.crouching === false){
+				this.jumping = false;
+				this.player.body.setSize(16,31,8,6);
+				if (game.time.now > this.jumpTimer){
+					this.player.play('stand');
+					this.player.body.velocity.x = 0;
+				}
 			}
 		}
-		if ((this.jumpButton.isDown || this.jumpButton2.isDown) && game.time.now > this.jumpTimer && this.player.body.touching.down) {
-			//console.log('jumping');
-			this.jumpging = true;
-			this.player.play('jump');
-			this.player.body.velocity.y = -310;
-			this.jumpTimer = game.time.now + 300;
-		}
+
 		//  Crouching ball spin
 		if (this.crouching){
-			this.player.body.setSize(16,16,8,15);
 			this.player.play('ball');
 		}
 
-		this.fireWeapon();
+		if (this.cursor.down.downDuration(250) || this.down.downDuration(250)) {
+			// double tap code
+			//console.log('hold down');
+		}
+
+		//this.yourButton.events.onInputDown.add(this.confirmDoubleClick, this);
+
+		//  Bring objext to the foreground (doorways, overhangs, etc)
+		game.world.bringToTop(this.doorways);
 
 	},
 
+	playerJump: function() {
+		if (game.time.now > this.jumpTimer && this.player.body.touching.down) {
+
+			if ((this.left.isDown || this.cursor.left.isDown) || (this.right.isDown || this.cursor.right.isDown))
+				this.player.play('jumpRoll');
+			else
+				this.player.play('jump');
+
+			//console.log('jumping');
+			this.jumping = true;
+			this.player.body.velocity.y = -310;
+			this.jumpTimer = game.time.now + 900;
+		}
+	},
+
+	playerCrouch: function() {
+		if (this.weaponBall === true){
+			if (!this.secondClick) {
+				//console.log('single click');
+				this.secondClick = true;
+				this.time.events.add(300, function(){
+					this.secondClick = false;
+				},this);
+				return;
+			}
+			//console.log ("double click");
+			this.crouching = true;
+			this.player.body.setSize(16,16,8,15);
+		}
+	},
+
 	fireWeapon: function() {
-		if ((this.fire.isDown || this.fire2.isDown) && this.crouching === false) {
+		if (this.crouching === false) {
 			if (game.time.now > this.bulletTime) {
 				bullet = this.bullets.getFirstExists(false);
 				if (bullet) {
 					bullet.lifespan = 100;
 					bullet.anchor.setTo(0.5, 0.5);
+					//  fire up
+					if (this.cursor.up.isDown || this.up.isDown){
+						if (this.player.scale.x === 1)
+							bullet.reset(this.player.x + 2, this.player.y - 41);
+						else
+							bullet.reset(this.player.x - 2, this.player.y - 41);
+
+						bullet.body.velocity.y = -400;
+					}
+					//  fire down ( must be jumping ? )
+					else if ((this.cursor.down.isDown || this.down.isDown)){
+						if (this.player.body.touching.down === false){
+							bullet.reset(this.player.x - 2, this.player.y - 12);
+							bullet.body.velocity.y = 400;
+						}
+					}
 					//  fire left
-					if (this.player.scale.x === 1){
-						bullet.reset(this.player.x + 16, this.player.y - 28);
+					else if (this.player.scale.x === 1){
+						bullet.reset(this.player.x + 9, this.player.y - 28);
 						bullet.body.velocity.x = 400;
 					}
 					//  fire right
-					if (this.player.scale.x === -1){
-						bullet.reset(this.player.x - 16, this.player.y - 28);
+					else if (this.player.scale.x === -1){
+						bullet.reset(this.player.x - 9, this.player.y - 28);
 						bullet.body.velocity.x = -400;
 					}
-					// fire up
-					if (this.cursor.up.isDown || this.up.isDown){
-						bullet.body.velocity.y = -400;
-						if (this.player.scale.x === 1)
-							bullet.reset(this.player.x + 2, this.player.y - 50);
-						else
-							bullet.reset(this.player.x - 2, this.player.y - 50);
-					}
-					// fire down ( must be jumping )
-					if ((this.cursor.down.isDown || this.down.isDown)){
-						bullet.body.velocity.y = 400;
-					}
-					this.bulletTime = game.time.now + 200;
+					this.bulletTime = game.time.now + 100;
 				}
 			}
 		}
 	},
 
-	//  Function to kill a coin
+	//  Pickup energy
 	pickupEnergy: function(player, energy) {
 		energy.kill();
 		this.playerEnergy +=  2;
@@ -305,28 +342,42 @@ var metroid = {
 		this.weaponBall = true;
 	},
 
-	//  Function to restart the game
-	restart: function() {
-		this.playerEnergy -=  2;
+	//  Kill the player
+	killPlayer: function() {
+		this.playerEnergy -=  5;
 		console.log(this.playerEnergy);
+		//  knock player back
+		if (this.player.body.touching.right)
+			this.player.x -= 10;
+		if (this.player.body.touching.left)
+			this.player.x += 10;
+		//  kill player
 		if (this.playerEnergy <= 0)
 			game.state.start('metroid');
 	},
 
+	//  Kill bullet when it hit walls and doorways
 	bulletKill: function(bullet){
 		bullet.kill();
 	},
 
+	//  Kill enemies
 	killEnemy: function(enemy,bullet){
 		bullet.kill();
 		enemy.kill();
 	},
 
+	//  Break rocks
 	breakRock: function(rock,bullet){
 		bullet.kill();
 		rock.kill();
+		game.time.events.add(Phaser.Timer.SECOND + 6000, function(){
+			console.log('rock rest');
+			rock.reset(rock.x,rock.y);
+		}, this).autoDestroy = true;
 	},
 
+	//  Open door
 	openDoor: function(door,bullet){
 		bullet.kill();
 		door.kill();
@@ -337,19 +388,20 @@ var metroid = {
 		}, this).autoDestroy = true;
 	},
 
+	//  Traverse doorway
 	walkThroughDoor: function(){
 		boundsWidth = game.world.bounds.width;
 		if (this.player.scale.x === 1){
-			this.player.x += 9; //  numdge player through door
+			//this.player.x += 9; //  numdge player through door
 			//game.world.setBounds(boundsWidth,0,1024,240);
 			this.boundsOffset = this.boundsOffset + boundsWidth;
 		}
 		else {
-			this.player.x -= 9; //  nudge player through door
+			//this.player.x -= 9; //  nudge player through door
 			//game.world.setBounds(0,0,1024,240);
 			this.boundsOffset = this.boundsOffset - boundsWidth;
 		}
-		console.log(this.boundsOffset);
+		//console.log(this.boundsOffset);
 	},
 
 	buildMap: function(level){
@@ -452,6 +504,7 @@ var metroid = {
 				}
 				else if (level[i][j] == 'd') {
 					var doorFrame = game.add.sprite(16*j, 16*i, 'doorFrame');
+					doorFrame.bringToTop();
 					doorFrame.body.immovable = true;
 					this.doorways.add(doorFrame);
 				}
