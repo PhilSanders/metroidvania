@@ -28,6 +28,7 @@ var metroid = {
 		game.load.image('fire', 'assets/fire.png');
 		game.load.image('enemy', 'assets/enemy.png');
 		game.load.spritesheet('enemyBug', 'assets/enemy_bug.png',16,16);
+		game.load.spritesheet('enemyBat', 'assets/enemy_bat.png',16,16);
 		game.load.image('bullet', 'assets/bullet_single.png');
     },
 
@@ -90,37 +91,37 @@ var metroid = {
 			'                     a     a                                  ppxx                   o            o    o                      pppp            pp',
 			'          btbb       P     P                                  bbxx           o                    *    *                      bbbb            bb',
 			'          bsbp       AA   AA                                  Ddd-               o          oo    v    v    oo                Ddd     *       Dd',
-			'          pbtbb      sb   sb*                                 -dd-                                               v            -dd-  bsrrrrsb  -d',
-			'          bbsbp      bp   bp                               *  -dd-       o                  *                                 -dd-       *    -d',
+			'          pbtbb      sb   sb                                  -dd-                                               v            -dd-  bsrrrrsb  -d',
+			'          bbsbp      bp   bp                                  -dd-       o                  *                                 -dd-       *    -d',
 			'           pbtbb     pp   pp                              bttbAAxxxxxxxxxxxxxxxxxxx    xxxxxxxxxxxxxxxxxxxxxxxx     xxxxxxxxxxxxSSSSrrrrrrrrbtbb',
 			'      O    bbsbp     bb   bb                                  sbxxxxxxxxxxxxxxxxxxx    xxxxxxxxxxxxxxxxxxxxxxxxfffffxxxxxxxxxxxxSssS        bsbp',
-			'      v     pbbb                                              bpffxxxxxxxxxxxxxxxxxffffxxxxxxxxxxxxxxxxxxxxxxxx!!!!!xxxxxxxxxxxxssss  rrrr  pbbb',
+			'      v     pbbb                               ^              bpffxxxxxxxxxxxxxxxxxffffxxxxxxxxxxxxxxxxxxxxxxxx!!!!!xxxxxxxxxxxxssss  rrrr  pbbb',
 			'   a  v  a  bbsb                                              pp!!xxxxxxxxxxxxxxxxx!!!!xxxxxxxxxxxxxxxxxxxxxxxx!!!!!xxxxxxxxxxxxAASS        bbAA',
-			'   vv T vv           vvvvvvv             *                    bb!!xxxxxxxxxxxxxxxxx!!!!xxxxxxxxxxxxxxxxxxxxxxxx!!!!!xxxxxxxxxxxxsb            sb',
+			'   vv T vv           vvvvvvv                                  bb!!xxxxxxxxxxxxxxxxx!!!!xxxxxxxxxxxxxxxxxxxxxxxx!!!!!xxxxxxxxxxxxsb            sb',
 			'bggggbggbggggbggbggggbggbggggbggbggggbggbggggbggbggggbggbggggbgg!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!vxxxxxxxxxxxbp            bp',
-			'bbssbbsbbbssbbsbbbssbbsbbbssbbsbbssbbsbbbssbbsbbbssbbsbbbssbbsbb!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!vxxxxxxxxxxxpp    bbbb    pp',
+			'bbssbbsbbbssbbsbbbssbbsbbbssbbsbbssbbsbbbssbbsbbbssbbsbbbssbbsbb!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!vxxxxxxxxxxxppffffbbbbffffpp',
 		  // 123456789012345612345678901234561234567890123456123456789012345612345678901234561234567890123456123456789012345612345678901234561234567890123456
 		  // |               |               |               |               |               |               |               |               |               |
 		];
 
 		var level2 = [
-			'                  AsbbbbWbssbbbbAA',
-			'                  sbWwW  bbbWwW sb',
-			'                  bb       b    bp',
-			'                  pp            pp',
-			'                  bb            bb',
-			'                Ddd     *       Ddd',
-			'                 dd-  bsrrrrsb  -dd',
-			'                 dd-       *    -dd',
-			'                  SSSSrrrrrrrrbtbb',
-			'                  SssS        bsbp',
-			'                  ssss  rrrr  pbbb',
-			'                  AASS        bbAA',
-			'                  sb            sb',
-			'                  bp            bp',
-			'                  pp    bbbb    pp',
-			// 12345678901234561234567890123456123456789012345612345678901234561234567890123456123456789012345612345678901234561234567890123456
-		  	// |               |               |               |               |               |               |               |               |
+			'                AsbbbbWbssbbbbAA',
+			'                sbWwW  bbbWwW sb',
+			'                bb       b    bp',
+			'                pp            pp',
+			'                bb            bb',
+			'              Ddd     *       Ddd',
+			'               dd-  bsrrrrsb  -dd',
+			'               dd-       *    -dd',
+			'                SSSSrrrrrrrrbtbb',
+			'                SssS        bsbp',
+			'                ssss  rrrr  pbbb',
+			'                AASS        bbAA',
+			'                sb            sb',
+			'                bp            bp',
+			'                pp    bbbb    pp',
+		  // 12345678901234561234567890123456123456789012345612345678901234561234567890123456123456789012345612345678901234561234567890123456
+		  // |               |               |               |               |               |               |               |               |
 		];
 
 		this.buildMap(level);
@@ -391,6 +392,7 @@ var metroid = {
 	//  Traverse doorway
 	walkThroughDoor: function(){
 		boundsWidth = game.world.bounds.width;
+		roomNumber = 0;
 		if (this.player.scale.x === 1){
 			//this.player.x += 9; //  numdge player through door
 			//game.world.setBounds(boundsWidth,0,1024,240);
@@ -521,11 +523,12 @@ var metroid = {
 					orb.play('glow');
 					this.orbs.add(orb);
 				}
-				//  Create a enemy and add it to the 'enemies' group
+				//  Enemy
 				else if (level[i][j] == '!') {
 					var enemy = game.add.sprite(16*j, 16*i, 'enemy');
 					this.enemies.add(enemy);
 				}
+				//  Enemy bug
 				else if (level[i][j] == '*') {
 					var enemyBug = game.add.sprite(16*j, 16*i, 'enemyBug');
 					//enemyBug.anchor.setTo(.5, .5);
@@ -533,7 +536,15 @@ var metroid = {
 					enemyBug.play('wiggle');
 					this.enemies.add(enemyBug);
 				}
-				//  Create a enemy and add it to the 'enemies' group
+				//  Enemy bat
+				else if (level[i][j] == '^') {
+					var enemyBat = game.add.sprite(16*j, 16*i, 'enemyBat');
+					//enemyBug.anchor.setTo(.5, .5);
+					enemyBat.animations.add('fly',[0,1,2,3],5,true);
+					enemyBat.play('fly');
+					this.enemies.add(enemyBat);
+				}
+				//  fire (enemy group)
 				else if (level[i][j] == 'f') {
 					var fire = game.add.sprite(16*j, 16*i, 'fire');
 					this.enemies.add(fire);
