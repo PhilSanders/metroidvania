@@ -1,0 +1,16 @@
+{
+  "name": "metroidvania",
+  "version": "1.0.0",
+  "main": "gulpfile.js",
+  "dependencies": {
+    "phaser": "^2.6.2"
+  },
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-useref": "^3.1.5",
+    "gulp-webserver": "^0.9.1"
+  },
+  "scripts": {},
+  "author": "",
+  "license": "NO LICENSE"
+}
