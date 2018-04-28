@@ -1,11 +1,11 @@
 'use-strict';
 
-var gulp = require('gulp'),
+const gulp = require('gulp'),
     webserver = require('gulp-webserver'),
     useref = require('gulp-useref');
 
-gulp.task('webserver', function() {
-  gulp.src('.')
+gulp.task('webserver', ['build'], () => {
+  gulp.src('tmp')
   .pipe(webserver({
     livereload: true,
     directoryListing: false,
@@ -15,8 +15,15 @@ gulp.task('webserver', function() {
   }));
 });
 
-gulp.task('build', function(){
-  return gulp.src('./*.html')
-        .pipe(useref())
-        .pipe(gulp.dest('dist'));
+gulp.task('assets', () => {
+  return gulp.src('src/assets/*.png')
+        .pipe(gulp.dest('tmp/assets/'));
 });
+
+gulp.task('build', ['assets'], () => {
+  return gulp.src('src/*.html')
+        .pipe(useref())
+        .pipe(gulp.dest('tmp'));
+});
+
+gulp.task('default', ['webserver']);

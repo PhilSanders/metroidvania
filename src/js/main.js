@@ -1,35 +1,38 @@
-//  Create the state that will contain the whole game
+/*
+ * MeTRoiDVaNiA Phaser.io Game
+ * Author: Phil Sanders (philsanders79@gmail.com)
+ */
 
 var metroid = {
   preload: function() {
-    game.load.spritesheet('player', 'assets/samus_run.png',32,44);
-    game.load.image('slate', 'assets/slate.png');
-    game.load.image('slate2', 'assets/slate2.png');
-    game.load.image('block', 'assets/block.png');
-    game.load.image('rock', 'assets/rock.png');
-    game.load.image('pillar', 'assets/pillar.png');
-    game.load.image('pipe', 'assets/pipe.png');
-    game.load.image('tube', 'assets/tube.png');
-    game.load.image('tube2', 'assets/tube2.png');
-    game.load.image('aztek', 'assets/astek.png');
-    game.load.image('aztek2', 'assets/astek2.png');
-    game.load.image('ground', 'assets/ground.png');
-    game.load.image('wedge', 'assets/wedge.png');
-    game.load.image('wedge2', 'assets/wedge2.png');
-    game.load.image('wall', 'assets/wall.png');
-    game.load.image('pole', 'assets/pole.png');
-    game.load.image('vent', 'assets/vent.png');
-    game.load.image('coin', 'assets/coin.png');
-    game.load.image('door', 'assets/door.png');
-    game.load.image('door2', 'assets/door2.png');
-    game.load.image('doorFrame', 'assets/door_frame.png');
-    game.load.spritesheet('life', 'assets/life_small.png',16,16);
-    game.load.spritesheet('orb', 'assets/orb_glow.png',16,16);
-    game.load.image('fire', 'assets/fire.png');
-    game.load.image('enemy', 'assets/enemy.png');
-    game.load.spritesheet('enemyBug', 'assets/enemy_bug.png',16,16);
-    game.load.spritesheet('enemyBat', 'assets/enemy_bat.png',16,16);
-    game.load.image('bullet', 'assets/bullet_single.png');
+    game.load.spritesheet('player', '../assets/samus_run.png',32,44);
+    game.load.image('slate', '../assets/slate.png');
+    game.load.image('slate2', '../assets/slate2.png');
+    game.load.image('block', '../assets/block.png');
+    game.load.image('rock', '../assets/rock.png');
+    game.load.image('pillar', '../assets/pillar.png');
+    game.load.image('pipe', '../assets/pipe.png');
+    game.load.image('tube', '../assets/tube.png');
+    game.load.image('tube2', '../assets/tube2.png');
+    game.load.image('aztek', '../assets/astek.png');
+    game.load.image('aztek2', '../assets/astek2.png');
+    game.load.image('ground', '../assets/ground.png');
+    game.load.image('wedge', '../assets/wedge.png');
+    game.load.image('wedge2', '../assets/wedge2.png');
+    game.load.image('wall', '../assets/wall.png');
+    game.load.image('pole', '../assets/pole.png');
+    game.load.image('vent', '../assets/vent.png');
+    game.load.image('coin', '../assets/coin.png');
+    game.load.image('door', '../assets/door.png');
+    game.load.image('door2', '../assets/door2.png');
+    game.load.image('doorFrame', '../assets/door_frame.png');
+    game.load.spritesheet('life', '../assets/life_small.png',16,16);
+    game.load.spritesheet('orb', '../assets/orb_glow.png',16,16);
+    game.load.image('fire', '../assets/fire.png');
+    game.load.image('enemy', '../assets/enemy.png');
+    game.load.spritesheet('enemyBug', '../assets/enemy_bug.png',16,16);
+    game.load.spritesheet('enemyBat', '../assets/enemy_bat.png',16,16);
+    game.load.image('bullet', '../assets/bullet_single.png');
   },
   create: function() {
     //  Scale game to window
@@ -576,7 +579,6 @@ var metroid = {
     //this.enemies.forEachAlive(this.renderGroup, this, 'rgba(255, 0, 186, 0.2)');
     //this.rocks.forEachAlive(this.renderGroup, this, 'rgba(255, 108, 0, 0.5)');
   },
-
   renderGroup: function(group,color) {
     game.debug.body(group,color);
   }
