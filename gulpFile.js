@@ -26,4 +26,8 @@ gulp.task('build', ['assets'], () => {
         .pipe(gulp.dest('tmp'));
 });
 
-gulp.task('default', ['webserver']);
+gulp.task('webserver:watch', ['webserver'], () => {
+  gulp.watch('src/**/*', ['build']);
+});
+
+gulp.task('default', ['webserver:watch']);
